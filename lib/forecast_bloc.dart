@@ -10,7 +10,7 @@ class ForecastBloc {
 
   StreamSubscription<Forecast> _fetchForecastSub;
 
-  final _forecastController = StreamController.broadcast<ForecastBlocState>();
+  final _forecastController = StreamController<ForecastBlocState>.broadcast();
   Stream<ForecastBlocState> get forecastStream => _forecastController.stream;
 
   ForecastBloc() {
