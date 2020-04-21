@@ -8,7 +8,7 @@ class ForecastBloc {
 
   ForecastBlocState _currentState;
 
-  StreamSubscription<Forecast> _fetchForecastSub;
+  StreamSubscription<List<Forecast>> _fetchForecastSub;
 
   final _forecastController = StreamController<ForecastBlocState>.broadcast();
   Stream<ForecastBlocState> get forecastStream => _forecastController.stream;
@@ -29,9 +29,9 @@ class ForecastBloc {
 
     _apiClient.requestForecastForCity(city)
         .asStream()
-        .listen((dynamic forecast) {
-          if (forecast is Forecast) {
-            _currentState.forecast = forecast;
+        .listen((dynamic forecasts) {
+          if (forecasts is List) {
+            _currentState.forecasts = forecasts;
           }
           _currentState.loading = false;
           _forecastController.add(_currentState);
@@ -41,12 +41,12 @@ class ForecastBloc {
 
 class ForecastBlocState {
   bool loading;
-  Forecast forecast;
+  List<Forecast> forecasts;
 
-  ForecastBlocState(this.loading, this.forecast);
+  ForecastBlocState(this.loading, this.forecasts);
 
   ForecastBlocState.empty() {
     loading = false;
-    forecast = null;
+    forecasts = null;
   }
 }

@@ -1,18 +1,17 @@
+import 'date_utils.dart';
+
 class Forecast {
-  List<double> temperatures;
-  List<DateTime> times;
+  double temperatures;
+  DateTime times;
 
   Forecast.fromJson(Map<String, dynamic> json) {
-    List<dynamic> list = json['list'];
+    this.temperatures =  json['main']['temp'].toDouble();
+    var timestamp = json['dt'] as int;
+    this.times = DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
+  }
 
-    this.temperatures = list.map((value) {
-      double temp = value['main']['temp'].toDouble();
-      return temp;
-    }).toList();
-
-    this.times = list.map((value) {
-      var timestamp = value['dt'] as int;
-      return DateTime.fromMillisecondsSinceEpoch(timestamp * 1000);
-    }).toList();
+  @override
+  String toString() {
+    return DateUtils.formattedDate(times)+ " =  " + temperatures.toString() + ' C';
   }
 }

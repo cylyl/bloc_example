@@ -8,79 +8,53 @@ import 'package:flutter/material.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
-  final bloc = ForecastBloc();
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        primarySwatch: Colors.blueGrey,
       ),
-      home: ForecastBlocProvider(
-        bloc: bloc,
-        child: WeatherListScreen(
-          title: 'Weather in Hamburg',
+      home: Scaffold(
+        appBar: AppBar(title: Text('Weather in Hamburg')),
+        body: ForecastBlocProvider(
+          bloc: ForecastBloc(),
+          child: WeatherListScreen(
+          ),
         ),
-      )
+      ),
     );
   }
 }
 
-class WeatherListScreen extends StatefulWidget {
-  WeatherListScreen({Key key, this.title}) : super(key: key);
-
-  final String title;
-
-  @override
-  _WeatherListScreenState createState() => _WeatherListScreenState();
-}
-
-class _WeatherListScreenState extends State<WeatherListScreen> {
-  bool _firstTimeLoad = true;
+class WeatherListScreen extends StatelessWidget {
+  WeatherListScreen({Key key}): super(key:key);
 
   @override
   Widget build(BuildContext context) {
     ForecastBloc bloc = ForecastBlocProvider.of(context).bloc;
-
-    if (_firstTimeLoad) {
-      bloc.fetchForecastForCity('Hamburg');
-      _firstTimeLoad = false;
-    }
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: StreamBuilder<ForecastBlocState>(
-          initialData: bloc.getCurrentState(),
-          stream: bloc.forecastStream,
-          builder: _buildBody
-      ),
-    );
-  }
-
-  Widget _buildBody(BuildContext context,
-      AsyncSnapshot<ForecastBlocState> snapshot) {
-    if (snapshot.data.loading) {
-      return Center(
-        child: CircularProgressIndicator(),
-      );
-    }
-
-    return ForecastList(
-      forecast: snapshot.data.forecast,
-      refreshCallback: _handleRefresh,
-    );
-  }
-
-  Future<Null> _handleRefresh() async {
-    ForecastBloc bloc = ForecastBlocProvider.of(context).bloc;
-
     bloc.fetchForecastForCity('Hamburg');
 
-    await bloc.forecastStream.first;
+    return StreamBuilder<ForecastBlocState>(
+        initialData: bloc.getCurrentState(),
+        stream: bloc.forecastStream,
+        builder: (BuildContext context,
+            AsyncSnapshot<ForecastBlocState> snapshot) {
+          if (snapshot.data.loading) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
 
-    return null;
+          return ForecastList(
+            forecasts: snapshot.data.forecasts,
+            refreshCallback: () async {
+              bloc.fetchForecastForCity('Hamburg');
+              await bloc.forecastStream.first;
+            },
+          );
+        }
+    );
   }
 }
